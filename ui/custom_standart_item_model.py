@@ -176,7 +176,7 @@ class CustomStandardItemModel(QStandardItemModel):
                     node_name, path, node_data, zip_ref, parent=parent_item
                 )
 
-        self.paint_items_and_expand(self.invisibleRootItem(), view_name)
+        # self.paint_items_and_expand(self.invisibleRootItem(), view_name)   #同一个窗口实例运行第二次以后易发生崩溃，因为做了sync_expand，多次运行后可能index会失效
 
     def paint_items_and_expand(self, parent_item, view_name: str) -> None:
         """Recursively style and expand items starting from the parent item."""

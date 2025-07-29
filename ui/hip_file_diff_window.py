@@ -458,6 +458,9 @@ class HipFileDiffWindow(QMainWindow):
         self.target_model.populate_with_data(
             self.houdini_comparator.target_data, self.target_treeview.objectName()
         )
+        #self.source_treeview.expandAll()
+        self.source_model.paint_items_and_expand(self.source_model.invisibleRootItem(), "")
+        self.target_model.paint_items_and_expand(self.target_model.invisibleRootItem(), "")
 
         self.source_treeview.model().invalidateFilter()
         self.target_treeview.model().invalidateFilter()
