@@ -106,7 +106,7 @@ class HoudiniComparator(ABC):
 
         for parm in node.parms():
             node_data.add_parm(
-                parm.name(), ParamData(parm.name(), parm.eval(), None)
+                parm.name(), ParamData(parm.name(), parm.rawValue(), None)
             )
 
         return node_data

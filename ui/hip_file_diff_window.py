@@ -30,7 +30,7 @@ from ui.hatched_pattern_item_delegate import HatchedItemDelegate
 from ui.file_selector import FileSelector
 from ui.search_line_edit import QTreeViewSearch
 from ui.string_diff_dialog import StringDiffDialog
-
+from functools import partial
 
 class HipFileDiffWindow(QMainWindow):
     """
@@ -140,7 +140,6 @@ class HipFileDiffWindow(QMainWindow):
         self.source_model.set_view(self.source_treeview)
         self.source_treeview.setModel(self.source_model)
         self.source_layout.addWidget(self.source_treeview)
-
         self.target_treeview = self.create_tree_view(
             "target", hide_scrollbar=False
         )
@@ -205,7 +204,7 @@ class HipFileDiffWindow(QMainWindow):
         """
         tree_view = CustomQTreeView(self)
         tree_view.setItemDelegate(HatchedItemDelegate(tree_view))
-        tree_view.doubleClicked.connect(self.on_item_double_clicked)
+        tree_view.doubleClicked.connect(partial(self.on_item_double_clicked,tree_view) )
 
         tree_view.setObjectName(obj_name)
         tree_view.header().hide()
@@ -554,20 +553,51 @@ class HipFileDiffWindow(QMainWindow):
         # Update the target's scrollbar position to match the source's
         target_scrollbar.setValue(value)
 
-    def on_item_double_clicked(self, index):
-        selection_model = self.source_treeview.selectionModel()
+    def on_item_double_clicked(self, view,index):
+
+        selection_model = view.selectionModel()
         selection_model.select(
             index, 
             QItemSelectionModel.Select | QItemSelectionModel.Rows
         )
-    
+        
         index_displ_role_text = index.data(Qt.DisplayRole)
-        if index_displ_role_text.count("\n") >= 3 :
+
+        if index_displ_role_text.count("\n") >= 3 or len(index_displ_role_text) >= 50  :
+
             _, index_in_other_proxy = self.get_index_in_other_model(index)
+            
+            idx_source = index
+            idx_target = index_in_other_proxy
+            # model = self.get_model_by_index(index)
+            # if model.view.objectName() == "target":
+            if view.objectName() == "target":
+                idx_source = index_in_other_proxy
+                idx_target = index
             string_diff_dialog = StringDiffDialog(
-                index, 
-                index_in_other_proxy, 
+                idx_source, 
+                idx_target, 
                 parent=self
             )
             self.installEventFilter(string_diff_dialog)
             string_diff_dialog.show()
+
+    def get_model_by_index(self,index):
+        # 获取代理模型  
+        proxy_model = index.model()
+        
+        if isinstance(proxy_model, QSortFilterProxyModel):
+            source_model = proxy_model.sourceModel()
+        else:
+            source_model = proxy_model
+        return source_model
+        
+    def get_model_by_view(self,view):
+        # 获取代理模型  
+        proxy_model = view.model()
+        
+        if isinstance(proxy_model, QSortFilterProxyModel):
+            source_model = proxy_model.sourceModel()
+        else:
+            source_model = proxy_model
+        return source_model
