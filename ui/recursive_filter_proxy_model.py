@@ -1,11 +1,12 @@
 from typing import Optional, Set
 
-from hutil.Qt.QtCore import QSortFilterProxyModel, QModelIndex
+from hutil.Qt.QtCore import Qt,QSortFilterProxyModel, QModelIndex
 from hutil.Qt.QtGui import QStandardItem
 
 from ui.constants import DATA_ROLE, PATH_ROLE
 from api.data.item_data import ItemState
-
+from api.data.node_data import NodeData,NodeType
+from api.data.param_data import ParamData
 
 class RecursiveFilterProxyModel(QSortFilterProxyModel):
     """
@@ -25,9 +26,10 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
         """Check if a row in the source model should be included in the proxy model."""
         source_index = self.sourceModel().index(source_row, 0, source_parent)
         item_path = self.sourceModel().data(source_index, self.path_role)
-
+        
         # If there's an active filter for paths and the item's path isn't in it, reject this row.
         if self._filtered_paths and item_path not in self._filtered_paths:
+            # return True
             return False
 
         # If source model has a condition to show only edited items
@@ -35,7 +37,9 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
             hasattr(self.sourceModel(), "show_only_edited")
             and self.sourceModel().show_only_edited
         ):
-            if not self.conditionForItem(source_index):
+
+            if not self.conditionForItem(source_index,source_parent):
+                # return True
                 return False
 
         # Check if the current row matches the filter itself
@@ -55,20 +59,48 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
 
         return False
 
-    def conditionForItem(self, index: QModelIndex) -> bool:
+    def conditionForItem(self, index: QModelIndex,parent_index:QModelIndex) -> bool:
         """
         Check the condition for a given item.
 
         :param index: QModelIndex representing the item.
         :return: True if the item matches the condition, False otherwise.
         """
-        state_value = self.sourceModel().data(index, self.data_role).state
+        # data = self.sourceModel().data(index, self.data_role)
+        data = index.data(self.data_role)
+        parent_data = parent_index.data(self.data_role)
+        state_value = data.state
+        # 参数值类型 始终运行显示
+        if state_value ==  ItemState.VALUE:  
+            return True
+        # 非subnet 类型的节点 Unchange 不显示(不再判子项)
+        if isinstance(index.data(self.data_role),NodeData) :
+            # if "transform_add" in index.data(self.path_role):
+            # if "geo1" in index.data(Qt.DisplayRole):
+            #     print(11111111111)
+            #     print(index.data(self.data_role).state)
+            #     print(index.data(self.data_role).node_type)
+            #     print(index.data(self.path_role))
+            #     print(index.model().view)
+            if index.data(self.data_role).node_type == NodeType.NORMAL:
+                if state_value  in [ItemState.UNCHANGED]:
+                    return False
+
+        # 参数类型，Create 或者 Delete 时，考虑父项是否为Edited ，如果父项 也是 Create 或者 Delete，则不显示
+        if isinstance(index.data(self.data_role),ParamData) :
+            if state_value == ItemState.UNCHANGED:
+                return False
+            else:
+                if parent_data.state != ItemState.EDITED:
+                    return False
+                return True
+                
         if state_value not in [ItemState.UNCHANGED]:
             return True
 
         for i in range(self.sourceModel().rowCount(index)):
             child_index = self.sourceModel().index(i, 0, index)
-            if self.conditionForItem(child_index):
+            if self.conditionForItem(child_index,index):
                 return True
 
         return False

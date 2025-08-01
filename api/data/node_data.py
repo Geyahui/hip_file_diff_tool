@@ -1,7 +1,20 @@
 from dataclasses import dataclass, field
 from typing import Any
 from api.data.item_data import ItemData
+from enum import auto, Enum
 
+class NodeType(Enum):
+
+    NONE = auto()
+    HDANODE = auto()
+    Network = auto()
+    NORMAL = auto()
+
+    def __str__(self):
+        return f"{self.name.lower()}"
+
+    def __format__(self, spec):
+        return f"{self.name.lower()}"
 
 @dataclass
 class NodeData(ItemData):
@@ -9,13 +22,35 @@ class NodeData(ItemData):
     A class to represent some of the Houdini node data.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, node):
         """
         Initialize a new instance of the NodeData class.
 
         :param name: The name of the node.
         """
+        name = ""
+        node_type = NodeType.NONE
+        if node:
+            name = node.name()
+            node_type = NodeType.NORMAL
+            print( node)
+            print( node.isNetwork())
+            if node.type().definition():
+                node_type = NodeType.HDANODE
+            #elif node.type().name == "subnet":
+            elif  node.isNetwork():
+                node_type = NodeType.Network
+        
+        self.node_type = node_type
+        self.isBypassed = False
+
+        if node and hasattr(node,"isBypassed"):
+            self.isBypassed = node.isBypassed()
+        if self.isBypassed:
+            name = name+"(isBypassed)"
         super().__init__(name)
+
+        
 
     def add_parm(self, name: str, param: Any) -> None:
         """

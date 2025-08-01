@@ -71,6 +71,7 @@ class CustomStandardItemModel(QStandardItemModel):
             icon_path = icon_path.replace("_", "/", 1) + ".svg"
             self._set_icon_from_zip(item, icon_path, icons_zip)
 
+        # 这里在多次运行后有概率发生错误
         (parent.appendRow if parent else self.appendRow)(item)
 
         self.item_dictionary[path] = item
@@ -88,7 +89,7 @@ class CustomStandardItemModel(QStandardItemModel):
         """Add parameters as child items to given item."""
         parm_name = "userDataDict"
         parm = user_data
-
+        # state = None  不显示
         if not parm.state:
             return
 
@@ -128,6 +129,7 @@ class CustomStandardItemModel(QStandardItemModel):
         """Add parameters as child items to given item."""
         parm = data.get_parm_by_name(parm_name)
 
+        # state = None  不显示
         if not parm.state:
             return
 

@@ -1,4 +1,9 @@
 2025-8-1
 diff_hip_edited_only_on.png和  diff_hip_edited_only_off.png 记录了原始版本diff结果
-主要问题是当节点状态为delete时  其下的属性会被忽略，即使取消edited_only选项也看不到数据
-另外当节点状态为create时 其下的属性又总是显示，即使勾选edited_only也不会隐藏
+主要问题是当节点状态为delete时  其下的参数会被忽略，即使取消edited_only选项也看不到数据
+另外当节点状态为create时 其下的参数又总是显示，即使勾选edited_only也不会隐藏
+
+2025-8-1 v2
+diff_hip_edited_only_on_v2.png  diff_hip_edited_only_off_v2.png
+新修版本的 无论节点增删，所有参数都参与遍历，但是默认不显示
+当节点状态为 delete/create 时 如果他没有子节点，则不显示他的参数项

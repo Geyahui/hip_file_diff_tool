@@ -15,7 +15,7 @@ COLORS = {
     "green": "#6ba100",
 }
 
-HIP_FILE_FORMATS = {"hip", "hipnc", "hiplc", "hdt"}
+HIP_FILE_FORMATS = {"hda","hip", "hipnc", "hiplc", "hdt"}
 
 
 class HoudiniComparator(ABC):
@@ -72,18 +72,22 @@ class HoudiniComparator(ABC):
                 "Supported formats are: {', '.join(HIP_FILE_FORMATS)}."
             )
 
-    def _extract_node_data(self, node: hou.Node) -> NodeData:
+    def _extract_node_data(self, node: hou.Node,path = None) -> NodeData:
         """
         Extracts data from a given node.
 
         :param node: The node from which to extract data.
         :return: A NodeData object containing extracted data.
         """
-        node_data = NodeData(node.name())
+        node_data = NodeData(node)
         node_data.path = node.path()
+
         node_data.type = node.type()
         node_data.icon = node.type().icon()
         node_data.parent_path = self._get_parent_path(node)
+        if path:
+            node_data.path = path
+            node_data.parent_path = os.path.split(path)[0]
 
         input_connections = [inp_node.name() for inp_node in node.inputs() if inp_node]
         if input_connections:
@@ -124,7 +128,7 @@ class HoudiniComparator(ABC):
 
         :param path: The path of the node.
         """
-        new_data = NodeData("")
+        new_data = NodeData(None)
         new_data.parent_path = self.target_nodes[path].parent_path
         new_data.state = ItemState.CREATED
         index = get_ordered_dict_key_index(self.target_nodes, path)
@@ -146,7 +150,7 @@ class HoudiniComparator(ABC):
         :param path: The path of the node.
         :param source_node_data: The data associated with the source node.
         """
-        new_data = NodeData("")
+        new_data = NodeData(None)
         new_data.parent_path = source_node_data.parent_path
         new_data.state = ItemState.DELETED
         new_data.is_hatched = True
@@ -164,17 +168,27 @@ class HoudiniComparator(ABC):
         for path, source_node_data in self.source_nodes.items():
             if path not in self.target_nodes:
                 self._mark_node_as_deleted(path, source_node_data)
+                self._compare_node_params(path, source_node_data,True)  #节点为删除态时 也遍历参数，但是标记为DELETED，以方便展开所有时观察所有数据
             else:
                 self._compare_node_user_data(path, source_node_data)
                 self._compare_node_params(path, source_node_data)
+                target_node_dat = self.target_nodes.get(path)
+                if source_node_data.isBypassed != target_node_dat.isBypassed:
+                    source_node_data.state = ItemState.EDITED
+                    source_node_data.color =  COLORS["red"]
+                    source_node_data.alpha = 100
+                    target_node_dat.state = ItemState.EDITED
+                    target_node_dat.color =  COLORS["green"]
+                    target_node_dat.alpha = 100
 
-    def _compare_node_params(self, path: str, source_node_data: NodeData):
+    def _compare_node_params(self, path: str, source_node_data: NodeData,del_node = False):
         """
         Compare parameters of nodes between source and target data.
 
         :param path: The path of the node.
         :param source_node_data: The data associated with the source node.
         """
+
         for parm_name in list(source_node_data.parms):
             source_parm = source_node_data.get_parm_by_name(parm_name)
 
@@ -184,7 +198,7 @@ class HoudiniComparator(ABC):
                 self.source_nodes[path].state = ItemState.EDITED
                 self.source_nodes[path].color = COLORS["red"]
                 self.source_nodes[path].alpha = 100
-
+        
                 source_parm = self.source_nodes[path].get_parm_by_name(
                     parm_name
                 )
@@ -192,8 +206,8 @@ class HoudiniComparator(ABC):
                 source_parm.color = "red"
                 source_parm.alpha = 55
 
-                self.source_nodes[path].state = ItemState.EDITED
-                self.target_nodes[path].color = COLORS["red"]
+                self.target_nodes[path].state = ItemState.EDITED
+                self.target_nodes[path].color = COLORS["green"]
                 self.target_nodes[path].alpha = 100
 
                 parm = ParamData(parm_name, "", ItemState.DELETED)
@@ -202,11 +216,36 @@ class HoudiniComparator(ABC):
                 parm.is_hatched = True
 
                 self.target_nodes[path].add_parm(parm_name, parm)
+                if del_node:
+                    self.source_nodes[path].state = ItemState.DELETED
+                    self.target_nodes[path].state = ItemState.DELETED
+                    self.target_nodes[path].alpha = 0
                 continue
 
             target_parm = self.target_nodes[path].get_parm_by_name(parm_name)
 
+
             if str(source_parm.value) == str(target_parm.value):
+                source_parm.state = ItemState.UNCHANGED
+                source_parm.color = COLORS["red"]
+                source_parm.alpha = 10
+                
+                target_parm.state = ItemState.UNCHANGED
+                target_parm.color = COLORS["green"]
+                target_parm.alpha = 10
+                
+                # if source_node_data.state != ItemState.UNCHANGED:
+                # source_node_data.state = ItemState.UNCHANGED
+                # source_node_data.color = COLORS["red"]
+                # source_node_data.alpha = 10
+
+                # self.target_nodes[path].state = ItemState.UNCHANGED
+                # self.target_nodes[path].color = COLORS["green"]
+                # self.target_nodes[path].alpha = 10
+                if del_node:
+                    self.source_nodes[path].state = ItemState.DELETED
+                    self.target_nodes[path].state = ItemState.DELETED
+                    self.target_nodes[path].alpha = 0
                 continue
 
             source_parm.state = ItemState.EDITED
@@ -225,6 +264,10 @@ class HoudiniComparator(ABC):
             self.target_nodes[path].color = COLORS["green"]
             self.target_nodes[path].alpha = 100
 
+            if del_node:
+                self.source_nodes[path].state = ItemState.DELETED
+                self.target_nodes[path].state = ItemState.DELETED
+                self.target_nodes[path].alpha = 0
     def _compare_node_user_data(self, path: str, source_node_data: NodeData):
         """
         Compare userData dict of nodes between source and target data.
@@ -235,6 +278,8 @@ class HoudiniComparator(ABC):
         source_user_data_parm = source_node_data.user_data
 
         node_from_target_scene = self.target_nodes[path]
+
+
         target_user_data_parm = node_from_target_scene.user_data
 
         if source_user_data_parm.value == target_user_data_parm.value:
@@ -256,14 +301,15 @@ class HoudiniComparator(ABC):
             for parm_name in list(target_data.parms):
                 if parm_name in self.source_nodes[path].parms:
                     continue
-
+                
                 # created param
                 target_parm = target_data.get_parm_by_name(parm_name)
                 target_parm.state = ItemState.CREATED
                 target_parm.color = COLORS["green"]
                 target_parm.alpha = 55
+                if target_data.state != ItemState.CREATED:    #确保如果节点是新增的 不会在此处被错误标记为Edited
+                    target_data.state = ItemState.EDITED
 
-                target_data.state = ItemState.EDITED
                 target_data.color = COLORS["green"]
                 target_data.alpha = 100
 
@@ -273,18 +319,19 @@ class HoudiniComparator(ABC):
                 parm.is_active = False
 
                 self.source_nodes[path].add_parm(parm_name, parm)
-
-                self.source_nodes[path].state = ItemState.EDITED
+                if self.source_nodes[path].state != ItemState.CREATED:    #确保如果节点是新增的 不会在此处被错误标记为Edited
+                    self.source_nodes[path].state = ItemState.EDITED
                 self.source_nodes[path].alpha = 100
 
     def _handle_created_nodes(self):
         """Handle nodes that are newly created."""
         source_paths = set(self.source_nodes.keys())
         target_paths = set(self.target_nodes.keys())
-
+        add_paths = target_paths - source_paths
         # Faster set difference operation
-        for path in (target_paths - source_paths):  
+        for path in add_paths:  
             self._mark_node_as_created(path)
+        return add_paths
 
     def _get_parent_path(self, node) -> str:
         """Return the path of a node's parent or None if no parent is found."""
