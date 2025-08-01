@@ -56,26 +56,27 @@ class HipFileDiffWindow(QMainWindow):
         self.apply_stylesheet()
 
         self.clipboard = QApplication.clipboard()
-        self.main_path = args.main_path
+        if args:
+            self.main_path = args.main_path
 
-        if args.source_file_path:
-            self.source_file_line_edit.setText(args.source_file_path)
+            if args.source_file_path:
+                self.source_file_line_edit.setText(args.source_file_path)
 
-        if args.target_file_path:
-            self.target_file_line_edit.setText(args.target_file_path)
+            if args.target_file_path:
+                self.target_file_line_edit.setText(args.target_file_path)
 
-        if args.source_file_path and args.target_file_path:
-            self.handle_compare_button_click()
+            if args.source_file_path and args.target_file_path:
+                self.handle_compare_button_click()
 
-        if args.item_path:
-            item = self.source_model.get_item_by_path(args.item_path)
-            if not item:
-                QMessageBox.critical(
-                    None, "Error", "Specified item on this path was not found!"
-                )
-            else:
-                self.source_treeview.expand_to_index(item, self.source_treeview)
-                self.on_item_double_clicked(item.index())
+            if args.item_path:
+                item = self.source_model.get_item_by_path(args.item_path)
+                if not item:
+                    QMessageBox.critical(
+                        None, "Error", "Specified item on this path was not found!"
+                    )
+                else:
+                    self.source_treeview.expand_to_index(item, self.source_treeview)
+                    self.on_item_double_clicked(item.index())
 
         self.show_only_edited_checkbox.setChecked(True)
 

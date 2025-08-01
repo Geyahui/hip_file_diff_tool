@@ -1,0 +1,4 @@
+2025-8-1
+diff_hip_edited_only_on.png和  diff_hip_edited_only_off.png 记录了原始版本diff结果
+主要问题是当节点状态为delete时  其下的属性会被忽略，即使取消edited_only选项也看不到数据
+另外当节点状态为create时 其下的属性又总是显示，即使勾选edited_only也不会隐藏
