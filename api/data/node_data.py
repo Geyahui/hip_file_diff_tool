@@ -33,8 +33,6 @@ class NodeData(ItemData):
         if node:
             name = node.name()
             node_type = NodeType.NORMAL
-            print( node)
-            print( node.isNetwork())
             if node.type().definition():
                 node_type = NodeType.HDANODE
             #elif node.type().name == "subnet":
