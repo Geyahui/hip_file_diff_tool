@@ -21,15 +21,15 @@ from hutil.Qt.QtCore import (
 )
 from hutil.Qt.QtGui import QHoverEvent
 
-from hip_file_diff_tool.api.comparators.houdini_base_comparator import HoudiniComparator, HIP_FILE_FORMATS
-from hip_file_diff_tool.api.comparators.hip_comparator import HipFileComparator
+from hdf_api.comparators.houdini_base_comparator import HoudiniComparator, HIP_FILE_FORMATS
+from hdf_api.comparators.hip_comparator import HipFileComparator
 
-from hip_file_diff_tool.ui.custom_qtree_view import CustomQTreeView
-from hip_file_diff_tool.ui.custom_standart_item_model import CustomStandardItemModel
-from hip_file_diff_tool.ui.hatched_pattern_item_delegate import HatchedItemDelegate
-from hip_file_diff_tool.ui.file_selector import FileSelector
-from hip_file_diff_tool.ui.search_line_edit import QTreeViewSearch
-from hip_file_diff_tool.ui.string_diff_dialog import StringDiffDialog
+from hdf_ui.custom_qtree_view import CustomQTreeView
+from hdf_ui.custom_standart_item_model import CustomStandardItemModel
+from hdf_ui.hatched_pattern_item_delegate import HatchedItemDelegate
+from hdf_ui.file_selector import FileSelector
+from hdf_ui.search_line_edit import QTreeViewSearch
+from hdf_ui.string_diff_dialog import StringDiffDialog
 from functools import partial
 
 class HipFileDiffWindow(QMainWindow):

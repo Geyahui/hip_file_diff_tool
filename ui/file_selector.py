@@ -8,7 +8,7 @@ from hutil.Qt.QtWidgets import (
     QPushButton,
     QFileDialog,
 )
-from hip_file_diff_tool.ui.constants import ICONS_PATH
+from hdf_ui.constants import ICONS_PATH
 
 
 class FileSelector(QWidget):

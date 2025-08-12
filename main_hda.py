@@ -2,7 +2,7 @@ import sys
 import os
 import argparse
 
-from hip_file_diff_tool.ui.hda_diff_window import HdaDiffWindow
+from hdf_ui.hda_diff_window import HdaDiffWindow
 
 from hutil.Qt.QtWidgets import QApplication
 from hutil.Qt.QtCore import Qt

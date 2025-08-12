@@ -1,7 +1,7 @@
 import unittest
 from collections import OrderedDict
-from hip_file_diff_tool.api.data.item_data import ItemState
-from hip_file_diff_tool.api.data.node_data import NodeData
+from hdf_api.data.item_data import ItemState
+from hdf_api.data.node_data import NodeData
 
 
 class TestNodeData(unittest.TestCase):
