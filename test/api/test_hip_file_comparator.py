@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import patch, Mock
 
-from hdf_api.comparators.hip_comparator import HipFileComparator
-from hdf_api.utilities import COLORS
-from hdf_api.data.item_data import ItemState
-from hdf_api.data.node_data import NodeData
-from hdf_api.data.param_data import ParamData
+from api.comparators.hip_comparator import HipFileComparator
+from api.utilities import COLORS
+from api.data.item_data import ItemState
+from api.data.node_data import NodeData
+from api.data.param_data import ParamData
 import hou
 
 

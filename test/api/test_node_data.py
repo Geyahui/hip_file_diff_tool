@@ -1,7 +1,7 @@
 import unittest
 from collections import OrderedDict
-from hdf_api.data.item_data import ItemState
-from hdf_api.data.node_data import NodeData
+from api.data.item_data import ItemState
+from api.data.node_data import NodeData
 
 
 class TestNodeData(unittest.TestCase):

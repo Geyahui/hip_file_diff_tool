@@ -1,6 +1,6 @@
 import unittest
 from collections import OrderedDict
-from hdf_api.utilities import ordered_dict_insert, get_ordered_dict_key_index
+from api.utilities import ordered_dict_insert, get_ordered_dict_key_index
 
 
 class TestUtilities(unittest.TestCase):

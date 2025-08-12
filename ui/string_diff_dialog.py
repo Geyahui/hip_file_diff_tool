@@ -13,10 +13,10 @@ from hutil.Qt.QtWidgets import (
 )
 from hutil.Qt.QtCore import Qt, QTimer, QEvent
 
-from hdf_ui.constants import PATH_ROLE
-from hdf_ui.hatched_text_edit import HatchedTextEdit
-from hdf_ui.ui_utils import generate_link_to_clipboard
-from hdf_api.comparators.houdini_base_comparator import COLORS
+from ui.constants import PATH_ROLE
+from ui.hatched_text_edit import HatchedTextEdit
+from ui.ui_utils import generate_link_to_clipboard
+from api.comparators.houdini_base_comparator import COLORS
 
 
 class Overlay(QWidget):

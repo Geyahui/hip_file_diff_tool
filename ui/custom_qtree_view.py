@@ -4,8 +4,8 @@ from typing import List
 from hutil.Qt.QtWidgets import QTreeView, QMenu, QAction
 from hutil.Qt.QtCore import Qt, QModelIndex
 from hutil.Qt.QtGui import QMouseEvent, QPainter, QPixmap, QIcon, QColor
-from hdf_ui.constants import ICONS_PATH
-from hdf_ui.ui_utils import generate_link_to_clipboard
+from ui.constants import ICONS_PATH
+from ui.ui_utils import generate_link_to_clipboard
 
 
 class CustomQTreeView(QTreeView):

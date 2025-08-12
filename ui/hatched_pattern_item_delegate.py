@@ -2,7 +2,7 @@ from hutil.Qt.QtGui import QPixmap, QColor, QBrush, QPen, QPainter, QLinearGradi
 from hutil.Qt.QtWidgets import QStyledItemDelegate, QStyle
 from hutil.Qt.QtCore import Qt, QSize, QEvent
 
-from hdf_ui.constants import DATA_ROLE
+from ui.constants import DATA_ROLE
 
 
 class HatchedItemDelegate(QStyledItemDelegate):

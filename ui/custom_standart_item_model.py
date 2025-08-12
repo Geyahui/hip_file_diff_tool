@@ -12,8 +12,8 @@ from hutil.Qt.QtGui import (
 )
 from hutil.Qt.QtCore import Qt
 
-from hdf_api.data.item_data import ItemState
-from hdf_ui.constants import ICONS_ZIP_PATH, PATH_ROLE, DATA_ROLE, ICON_MAPPINGS
+from api.data.item_data import ItemState
+from ui.constants import ICONS_ZIP_PATH, PATH_ROLE, DATA_ROLE, ICON_MAPPINGS
 
 
 class CustomStandardItemModel(QStandardItemModel):

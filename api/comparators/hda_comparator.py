@@ -1,5 +1,5 @@
 import hou
-from hdf_api.comparators.houdini_base_comparator import HoudiniComparator
+from api.comparators.houdini_base_comparator import HoudiniComparator
 
 
 class HdaFileComparator(HoudiniComparator):
