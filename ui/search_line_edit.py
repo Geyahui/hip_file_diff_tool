@@ -5,8 +5,8 @@ from hutil.Qt.QtWidgets import QWidget, QLineEdit, QAbstractItemView, QAction
 from hutil.Qt.QtCore import Qt
 from hutil.Qt.QtGui import QPixmap, QIcon
 
-from ui.constants import PATH_ROLE, ICONS_PATH
-from ui.recursive_filter_proxy_model import RecursiveFilterProxyModel
+from hip_file_diff_tool.ui.constants import PATH_ROLE, ICONS_PATH
+from hip_file_diff_tool.ui.recursive_filter_proxy_model import RecursiveFilterProxyModel
 
 
 class QTreeViewSearch(QLineEdit):

@@ -3,10 +3,10 @@ from typing import Optional, Set
 from hutil.Qt.QtCore import Qt,QSortFilterProxyModel, QModelIndex
 from hutil.Qt.QtGui import QStandardItem
 
-from ui.constants import DATA_ROLE, PATH_ROLE
-from api.data.item_data import ItemState
-from api.data.node_data import NodeData,NodeType
-from api.data.param_data import ParamData
+from hip_file_diff_tool.ui.constants import DATA_ROLE, PATH_ROLE
+from hip_file_diff_tool.api.data.item_data import ItemState
+from hip_file_diff_tool.api.data.node_data import NodeData,NodeType
+from hip_file_diff_tool.api.data.param_data import ParamData
 
 class RecursiveFilterProxyModel(QSortFilterProxyModel):
     """

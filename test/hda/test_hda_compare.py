@@ -3,7 +3,7 @@ import os
 import argparse
 import unittest
 
-from ui.hda_diff_window import HdaDiffWindow
+from hip_file_diff_tool.ui.hda_diff_window import HdaDiffWindow
 
 from hutil.Qt.QtWidgets import QApplication
 from hutil.Qt.QtCore import Qt

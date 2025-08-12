@@ -1,6 +1,6 @@
 from enum import auto, Enum
 from collections import OrderedDict
-from api.data.item_data import ItemState
+from hip_file_diff_tool.api.data.item_data import ItemState
 
 
 class ParamData:

@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import patch, Mock
 
-from api.comparators.hip_comparator import HipFileComparator
-from api.utilities import COLORS
-from api.data.item_data import ItemState
-from api.data.node_data import NodeData
-from api.data.param_data import ParamData
+from hip_file_diff_tool.api.comparators.hip_comparator import HipFileComparator
+from hip_file_diff_tool.api.utilities import COLORS
+from hip_file_diff_tool.api.data.item_data import ItemState
+from hip_file_diff_tool.api.data.node_data import NodeData
+from hip_file_diff_tool.api.data.param_data import ParamData
 import hou
 
 

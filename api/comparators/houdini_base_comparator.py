@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 import os
 
-from api.data.item_data import ItemState
-from api.data.node_data import NodeData
-from api.data.param_data import ParamData
-from api.utilities import ordered_dict_insert, get_ordered_dict_key_index
+from hip_file_diff_tool.api.data.item_data import ItemState
+from hip_file_diff_tool.api.data.node_data import NodeData
+from hip_file_diff_tool.api.data.param_data import ParamData
+from hip_file_diff_tool.api.utilities import ordered_dict_insert, get_ordered_dict_key_index
 
 import hou
 
