@@ -7,7 +7,7 @@ from hutil.Qt.QtGui import QMouseEvent, QPainter, QPixmap, QIcon, QColor
 from ui.constants import ICONS_PATH
 from ui.ui_utils import generate_link_to_clipboard
 
-
+from api.data import node_data,param_data
 class CustomQTreeView(QTreeView):
     """
     A custom QTreeView that provides additional functionalities such as
@@ -99,16 +99,21 @@ class CustomQTreeView(QTreeView):
             return
         
         item_path = index.data(index.model().path_role)
+        item_data = index.data(index.model().data_role)
+
+        if not isinstance(item_data,node_data.NodeData) :
+            return
 
         copy_path_action = QAction("Copy node path", self)
         copy_path_action.triggered.connect(
-            lambda checked=False, path=item_path: self._copy_path_to_clipboard(path)
+            lambda checked=False, path=item_data.real_path: self._copy_path_to_clipboard(path)
         )
 
-        copy_link_action = QAction("Copy link", self)
-        copy_link_action.triggered.connect(
-            lambda checked=False, path=item_path: self._copy_link_to_clipboard(path)
-        )
+        # copy_link_action = QAction("Copy link", self)
+        # copy_link_action.triggered.connect(
+        #     lambda checked=False, path=item_path: self._copy_link_to_clipboard(path)
+        # )
+
 
         menu = QMenu(self)
         menu.setStyleSheet("""
@@ -126,7 +131,7 @@ class CustomQTreeView(QTreeView):
             }
         """)
         menu.addAction(copy_path_action)
-        menu.addAction(copy_link_action)
+        # menu.addAction(copy_link_action)
         menu.exec_(event.globalPos())
 
 

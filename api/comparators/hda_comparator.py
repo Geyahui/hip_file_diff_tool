@@ -1,4 +1,7 @@
+from imp import reload
 import hou
+from api.comparators import houdini_base_comparator
+reload(houdini_base_comparator)
 from api.comparators.houdini_base_comparator import HoudiniComparator
 
 class HdaFileComparator(HoudiniComparator):
@@ -55,11 +58,16 @@ class HdaFileComparator(HoudiniComparator):
         new_hda_node = geoNode.createNode(hda_definition.nodeTypeName())
         return new_hda_node
 
+    def clear_compare_geo(self ):
+        geoNode = hou.node('/obj/__compare_geo')
+        if  geoNode:
+            for child in geoNode.children():
+                child.destroy()
 
     def compare(self) -> None:
         """Compare the source and target HIP files to identify differences."""
         self._validate_file_paths()
-
+        self.clear_compare_geo()
         self.source_nodes = self.get_hda_data(self.source_file)
         self.target_nodes = self.get_hda_data(self.target_file)
 

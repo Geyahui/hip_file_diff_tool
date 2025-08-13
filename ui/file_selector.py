@@ -29,7 +29,7 @@ class FileSelector(QWidget):
 
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(1, 1, 1, 1)
-
+        
         self.setup_line_edit()
         self.setup_browse_button()
         self._set_styles()
@@ -57,6 +57,13 @@ class FileSelector(QWidget):
         if fname:
             self.lineEdit.setText(fname)
 
+    #记录额外的路径
+    def setRealPath(self, path: str):
+        self.lineEdit.setProperty("real_path",path)
+
+    def realPath(self):
+        return self.lineEdit.property("real_path")
+
     def setText(self, text: str):
         """
         Set the content of the QLineEdit.
@@ -65,7 +72,8 @@ class FileSelector(QWidget):
             text (str): The text to display in the QLineEdit.
         """
         self.lineEdit.setText(text)
-
+        self.setRealPath(text)
+        
     def setPlaceholderText(self, text: str):
         """
         Set placeholder text for the QLineEdit.

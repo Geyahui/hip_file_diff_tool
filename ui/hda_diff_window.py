@@ -25,10 +25,15 @@ from api.comparators.houdini_base_comparator import HoudiniComparator, HIP_FILE_
 from api.comparators import hda_comparator
 reload(hda_comparator)
 from api.comparators.hda_comparator import HdaFileComparator
-
+from ui import custom_qtree_view
+reload(custom_qtree_view)
 from ui.custom_qtree_view import CustomQTreeView
 from ui.custom_standart_item_model import CustomStandardItemModel
+from ui import hatched_pattern_item_delegate
+reload(hatched_pattern_item_delegate)
 from ui.hatched_pattern_item_delegate import HatchedItemDelegate
+from ui import file_selector
+reload(file_selector)
 from ui.file_selector import FileSelector
 from ui.search_line_edit import QTreeViewSearch
 from ui.string_diff_dialog import StringDiffDialog
@@ -90,7 +95,8 @@ class HdaDiffWindow(QMainWindow):
     def set_window_properties(self) -> None:
         """Set main window properties."""
         self.setWindowTitle(".hip files diff tool")
-        self.setGeometry(300, 300, 2000, 1300)
+        # self.setGeometry(300, 300, 2000, 1300)
+        self.resize( 2000, 1300)
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
 
@@ -393,20 +399,30 @@ class HdaDiffWindow(QMainWindow):
                 color: #818181;
                 border-radius: 4px;
             }}
+            QCheckBox::indicator {{
+                width: 26px;
+                height: 26px;
+            }}
+
+        """
+        checkbox_style = f"""
+        
             QCheckBox::indicator:unchecked {{
                 background-color: #3c3c3c;
                 border: 1px solid #818181;
-                border-radius: 4px;
+                border-radius: 9px;
             }}
             QCheckBox::indicator:checked {{
-                background-color: #555555;
+                background-color: DimGrey;
                 border: 1px solid rgb(185, 134, 32);
-                border-radius: 4px;
+                border-radius: 9px;
             }}
+            
             QCheckBox::indicator:hover {{
                 border: 1px solid rgb(185, 134, 32);
             }}
         """
+        stylesheet += checkbox_style
         self.setStyleSheet(
             str(stylesheet)
         )
@@ -431,15 +447,17 @@ class HdaDiffWindow(QMainWindow):
         """
         Handle the logic when the "Compare" button is clicked.
         """
-        source_path = self.source_file_line_edit.text()
-        target_path = self.target_file_line_edit.text()
+        source_path = self.source_file_line_edit.realPath()
+        target_path = self.target_file_line_edit.realPath()
+
         source_vaild =  source_path.startswith("[NODE]:") or os.path.exists(source_path)
         target_vaild =  target_path.startswith("[NODE]:") or os.path.exists(target_path)
+
         if not (source_vaild and target_vaild):
             QMessageBox.warning(
                 self,
                 "Invalid Paths",
-                "Please select valid .hip files to compare.",
+                "File Not Found.",
             )
             return
 
@@ -451,13 +469,13 @@ class HdaDiffWindow(QMainWindow):
         self.target_treeview.item_dictionary = {}
         self.target_treeview.model().invalidateFilter()
 
-        if Path(source_path).suffix[1:] not in HIP_FILE_FORMATS:
-            QMessageBox.warning(
-                self,
-                "Unsupported file",
-                f"Please select valid .hip files to compare. Supported extensions: {', '.join(HIP_FILE_FORMATS)}",
-            )
-            return
+        # if Path(source_path).suffix[1:] not in HIP_FILE_FORMATS:
+        #     QMessageBox.warning(
+        #         self,
+        #         "Unsupported file",
+        #         f"Please select valid .hip files to compare. Supported extensions: {', '.join(HIP_FILE_FORMATS)}",
+        #     )
+        #     return
 
         self.houdini_comparator = HdaFileComparator(source_path, target_path)
         self.houdini_comparator.force_compare_top_node = self.force_compare_top_node

@@ -81,6 +81,7 @@ class HoudiniComparator(ABC):
         """
         node_data = NodeData(node)
         node_data.path = node.path()
+        node_data.real_path = node.path()
 
         node_data.type = node.type()
         node_data.icon = node.type().icon()

@@ -27,6 +27,7 @@ class ItemData:
     """
     name: str  # The only required argument in the constructor
     path: Optional[str] = None
+    real_path: Optional[str] = None
     type: str = ""
     icon: str = ""
     state: ItemState = ItemState.UNCHANGED

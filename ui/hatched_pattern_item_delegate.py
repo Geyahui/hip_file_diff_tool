@@ -3,6 +3,7 @@ from hutil.Qt.QtWidgets import QStyledItemDelegate, QStyle
 from hutil.Qt.QtCore import Qt, QSize, QEvent
 
 from ui.constants import DATA_ROLE
+from api.data import node_data,param_data
 
 
 class HatchedItemDelegate(QStyledItemDelegate):
@@ -55,11 +56,18 @@ class HatchedItemDelegate(QStyledItemDelegate):
         return super().sizeHint(option, index)
     
     def helpEvent(self, event, view, option, index):
-        if event.type() == QEvent.ToolTip and index.data(Qt.DisplayRole):
-            if index.data(Qt.DisplayRole).count("\n") >= 3 :
-                view.setToolTip(
-                    "String diff available for this item,"
-                    "double click on item to open.")
+        
+        if event.type() == QEvent.ToolTip :
+            name = index.data(Qt.DisplayRole)
+            item_data = index.data(DATA_ROLE)
+            if  isinstance(item_data,node_data.NodeData) :
+                view.setToolTip(item_data.real_path)
+            elif isinstance(item_data,param_data.ParamData) :
+                view.setToolTip(item_data.value)
+                if name and name.count("\n") >= 3 :
+                    view.setToolTip(
+                        "String diff available for this item,"
+                        "double click on item to open.")
             else:
                 view.setToolTip("")  # Clear the tooltip for other items
         return super(HatchedItemDelegate, self)\
