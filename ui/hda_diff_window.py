@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+from imp import reload
 from hutil.Qt.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -22,6 +22,8 @@ from hutil.Qt.QtCore import (
 from hutil.Qt.QtGui import QHoverEvent
 
 from api.comparators.houdini_base_comparator import HoudiniComparator, HIP_FILE_FORMATS
+from api.comparators import hda_comparator
+reload(hda_comparator)
 from api.comparators.hda_comparator import HdaFileComparator
 
 from ui.custom_qtree_view import CustomQTreeView
@@ -44,7 +46,9 @@ class HdaDiffWindow(QMainWindow):
         super(HdaDiffWindow, self).__init__()
         self.houdini_comparator: HoudiniComparator = None
         self.args = args
-        self.force_compare_top_node = False
+        self.force_compare_top_node = True
+        self.keep_curret_scene = False
+        
         self.init_ui(args)
 
     def init_ui(self, args) -> None:
@@ -81,7 +85,7 @@ class HdaDiffWindow(QMainWindow):
 
         self.show_only_edited_checkbox.setChecked(True)
         self.force_compare_top_node_checkbox.setChecked(True)
-
+    
 
     def set_window_properties(self) -> None:
         """Set main window properties."""
@@ -429,8 +433,9 @@ class HdaDiffWindow(QMainWindow):
         """
         source_path = self.source_file_line_edit.text()
         target_path = self.target_file_line_edit.text()
-
-        if not (os.path.exists(source_path) and os.path.exists(target_path)):
+        source_vaild =  source_path.startswith("[NODE]:") or os.path.exists(source_path)
+        target_vaild =  target_path.startswith("[NODE]:") or os.path.exists(target_path)
+        if not (source_vaild and target_vaild):
             QMessageBox.warning(
                 self,
                 "Invalid Paths",
@@ -456,6 +461,8 @@ class HdaDiffWindow(QMainWindow):
 
         self.houdini_comparator = HdaFileComparator(source_path, target_path)
         self.houdini_comparator.force_compare_top_node = self.force_compare_top_node
+        self.houdini_comparator.keep_curret_scene = self.keep_curret_scene
+        
         self.houdini_comparator.compare()
 
         # Assuming 'comparison_result' contains the differences,
