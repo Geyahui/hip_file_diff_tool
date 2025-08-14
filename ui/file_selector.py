@@ -1,5 +1,6 @@
 import os
 
+from hutil.Qt.QtCore import QEvent
 from hutil.Qt.QtGui import QPixmap, QIcon
 from hutil.Qt.QtWidgets import (
     QWidget,
@@ -35,6 +36,12 @@ class FileSelector(QWidget):
         self._set_styles()
 
         self.setContentsMargins(0, 0, 0, 0)
+        
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            real_path = self.realPath()
+            self.setToolTip(f"{real_path}")
+        return super().event(event)
 
     def setup_line_edit(self):
         """Configure the QLineEdit component."""
