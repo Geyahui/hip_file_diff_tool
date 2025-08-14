@@ -1,6 +1,6 @@
 import os
 from typing import List
-
+from collections import OrderedDict
 from hutil.Qt.QtWidgets import QTreeView, QMenu, QAction
 from hutil.Qt.QtCore import Qt, QModelIndex
 from hutil.Qt.QtGui import QMouseEvent, QPainter, QPixmap, QIcon, QColor
@@ -17,6 +17,7 @@ class CustomQTreeView(QTreeView):
     def __init__(self, parent=None):
         super(CustomQTreeView, self).__init__(parent)
         self.parent_application = parent
+        self.user_context_menu = OrderedDict()
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         """
@@ -93,6 +94,9 @@ class CustomQTreeView(QTreeView):
         painter.setRenderHint(QPainter.Antialiasing, True)
         super().paintEvent(event)
 
+    def regist_context_menu(self, name,label,func):
+        self.user_context_menu[name] = {"label":label,"func":func}
+
     def contextMenuEvent(self, event):
         index = self.indexAt(event.pos())
         if not index.isValid():
@@ -108,12 +112,10 @@ class CustomQTreeView(QTreeView):
         copy_path_action.triggered.connect(
             lambda checked=False, path=item_data.real_path: self._copy_path_to_clipboard(path)
         )
-
         # copy_link_action = QAction("Copy link", self)
         # copy_link_action.triggered.connect(
         #     lambda checked=False, path=item_path: self._copy_link_to_clipboard(path)
         # )
-
 
         menu = QMenu(self)
         menu.setStyleSheet("""
@@ -132,12 +134,24 @@ class CustomQTreeView(QTreeView):
         """)
         menu.addAction(copy_path_action)
         # menu.addAction(copy_link_action)
+
+        for k,v in self.user_context_menu.items():
+            label = v["label"] 
+            func = v["func"] 
+            _action = QAction(label, self)
+            _action.triggered.connect(
+                lambda  checked=False: func(item_data.real_path)
+            )
+
+            menu.addAction(_action)
         menu.exec_(event.globalPos())
 
 
     def _copy_path_to_clipboard(self, item_path):
         print("ITEM_PATH_INSIDE_FUNC:", item_path)
         self.parent_application.clipboard.setText(item_path)
+
+
 
     def _copy_link_to_clipboard(self, item_path):
         generate_link_to_clipboard(self.parent_application, item_path)

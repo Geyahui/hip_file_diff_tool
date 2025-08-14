@@ -202,6 +202,58 @@ class HdaDiffWindow(QMainWindow):
             self.source_search_qline_edit.proxy_model.invalidate
         )
 
+    def _select_node(self, item_path):
+        import hou
+        def frameNetworkEditor(editor, items = None):
+            items = hou.selectedNodes()
+            if len(items)<1:
+                return
+            items_first = items[0]
+            
+            editor.cd(items_first.parent().path())
+            # 18.5 弃用
+            #editor.frameSelection()   
+
+            # 18.5 标记弃用但依然可用，但实际效果是 frame ，有动态
+            editor.homeToSelection() 
+            editor.redraw()
+
+            # 实际效果是 home 无动态
+            #editor.requestZoomReset()
+            #editor.redraw()
+
+        def frameNetworkEditor_2(editor, items = None):
+            if not items:
+                items = hou.selectedNodes()
+            if len(items)<1:
+                return
+            items_first = items[0]
+            xy1 = items_first.position() -  (items_first.size() / 2)
+            xy2 = items_first.position() +  (items_first.size() / 2)
+
+            #bound = hou.BoundingRect(0,0,0.1,0.1)
+            bound = hou.BoundingRect(xy1,xy2)
+            for node in items:
+                bound.enlargeToContain(node.position())
+            #print(bound.size())
+            #bound.scale((1.2,1.2))
+            bound.expand((2,2))
+            editor.cd(items_first.parent().path())
+
+            editor.setVisibleBounds(bound,transition_time=0.2,set_center_when_scale_rejected = 1)
+        
+        node = hou.node(item_path)
+        if node:
+            hou.node(item_path).setCurrent(1,1)
+            hou.node(item_path).setSelected(1,1)
+     
+            network_editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+            if network_editor:
+                frameNetworkEditor_2(network_editor)
+        else:
+            print(f"Node not found : {item_path}")
+
+
     def create_tree_view(
         self, obj_name: str, hide_scrollbar: bool = True
     ) -> CustomQTreeView:
@@ -216,6 +268,7 @@ class HdaDiffWindow(QMainWindow):
         - CustomQTreeView: Configured QTreeView instance.
         """
         tree_view = CustomQTreeView(self)
+        tree_view.regist_context_menu("select_node","Select Node",self._select_node)
         tree_view.setItemDelegate(HatchedItemDelegate(tree_view))
         tree_view.doubleClicked.connect(partial(self.on_item_double_clicked,tree_view) )
 
