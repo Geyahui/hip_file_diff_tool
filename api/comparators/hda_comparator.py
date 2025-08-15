@@ -6,8 +6,12 @@ from api.comparators.houdini_base_comparator import HoudiniComparator
 
 class HdaFileComparator(HoudiniComparator):
     """Comparator class for comparing two Houdini HIP files."""
-    force_compare_top_node = False
-    keep_curret_scene = False
+    def __init__(self, source_file: str, target_file: str):
+        super().__init__(source_file, target_file)
+        self.force_compare_top_node = False
+        self.keep_curret_scene = False
+        self.current_definition = None
+        self.tmp_definition = []
     def get_hda_data(self, hda_path: str) -> dict:
         """
         Retrieve data from a given HIP file.
@@ -47,9 +51,23 @@ class HdaFileComparator(HoudiniComparator):
         if not self.keep_curret_scene:
             hou.hipFile.clear()
         hda_definition  = hou.hda.definitionsInFile(hda_path)[0]
+        #nodetype = hda_definition.nodeType()  # 环境中没有同名定义会引起报错
+        hda_category = hda_definition.nodeTypeCategory() 
+        hda_name = hda_definition.nodeTypeName() 
+        nodetype = hou.nodeType(hda_category ,hda_name)
 
+        if  nodetype and isinstance(nodetype  ,hou.OpNodeType) :
+            if not self.current_definition:
+                self.current_definition = nodetype.definition()
+            # for definition in nodetype.allInstalledDefinitions():
+            #     if definition.isCurrent():
+            #         current_def = definition
+            #         break
+        
         if not hda_definition.isInstalled():
+            
             hou.hda.installFile(hda_path)
+        self.tmp_definition.append(hda_definition)
         hda_definition.setIsPreferred(1)
         geoNode = hou.node('/obj/__compare_geo')
         if not geoNode:
@@ -71,6 +89,13 @@ class HdaFileComparator(HoudiniComparator):
         self.source_nodes = self.get_hda_data(self.source_file)
         self.target_nodes = self.get_hda_data(self.target_file)
 
+        if self.current_definition:
+            self.current_definition.setIsPreferred(1)
+            for df in self.tmp_definition:
+                if df != self.current_definition:
+                    hda_path = df.libraryFilePath()  
+                    hou.hda.uninstallFile(hda_path)  #Embedded  也可以删除，除非当前有节点占用
+                    
         self._handle_deleted_and_edited_nodes()
         self._handle_created_nodes()
         self._handle_created_params()
