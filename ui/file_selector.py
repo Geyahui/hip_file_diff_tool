@@ -62,7 +62,7 @@ class FileSelector(QWidget):
         """Open a file dialog and set file path to the QLineEdit."""
         fname, _ = QFileDialog.getOpenFileName(self, "Open file")
         if fname:
-            self.lineEdit.setText(fname)
+            self.setText(fname)
 
     #记录额外的路径
     def setRealPath(self, path: str):

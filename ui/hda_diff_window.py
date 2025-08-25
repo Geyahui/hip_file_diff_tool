@@ -564,15 +564,20 @@ class HdaDiffWindow(QMainWindow):
         Args:
         - state: Current state of the checkbox.
         """
-        if state == Qt.Checked:
+        checked_state = Qt.CheckState(state)   # state 是整数，某些情况下会判不过
+        if checked_state == Qt.Checked:
             self.source_model.show_only_edited = True
             self.target_model.show_only_edited = True
 
-            self.source_search_qline_edit.capture_tree_state()
-            self.target_search_qline_edit.capture_tree_state()
+            # capture_tree_state 和 restore_tree_state 会记录非差异条目的展开状态，但是会清除差异条目的展开状态清除
+            # 并且会触发 filterAcceptsRow 增加开销，不使用逻辑更好
+            # self.source_search_qline_edit.capture_tree_state()
+            # self.target_search_qline_edit.capture_tree_state()
 
+            #用户复位filter状态 ,返回到"show only edited nodes",会触发 filterAcceptsRow
             self.source_treeview.model().reset_proxy_view()
             self.target_treeview.model().reset_proxy_view()
+
         else:
             self.source_model.show_only_edited = False
             self.target_model.show_only_edited = False
@@ -580,11 +585,11 @@ class HdaDiffWindow(QMainWindow):
             self.source_treeview.model().reset_proxy_view()
             self.target_treeview.model().reset_proxy_view()
 
-            if self.source_search_qline_edit.expanded_state:
-                self.source_search_qline_edit.restore_tree_state()
+            # if self.source_search_qline_edit.expanded_state:
+            #     self.source_search_qline_edit.restore_tree_state()
     
-            if self.target_search_qline_edit.expanded_state:
-                self.target_search_qline_edit.restore_tree_state()
+            # if self.target_search_qline_edit.expanded_state:
+            #     self.target_search_qline_edit.restore_tree_state()
 
     def sync_expand(self, index, expand: bool = True) -> None:
         """

@@ -65,8 +65,8 @@ class HdaFileComparator(HoudiniComparator):
             #         break
         
         if not hda_definition.isInstalled():
-            
             hou.hda.installFile(hda_path)
+
         self.tmp_definition.append(hda_definition)
         hda_definition.setIsPreferred(1)
         geoNode = hou.node('/obj/__compare_geo')
@@ -88,13 +88,13 @@ class HdaFileComparator(HoudiniComparator):
         self.clear_compare_geo()
         self.source_nodes = self.get_hda_data(self.source_file)
         self.target_nodes = self.get_hda_data(self.target_file)
-
-        if self.current_definition:
-            self.current_definition.setIsPreferred(1)
-            for df in self.tmp_definition:
-                if df != self.current_definition:
-                    hda_path = df.libraryFilePath()  
-                    hou.hda.uninstallFile(hda_path)  #Embedded  也可以删除，除非当前有节点占用
+        if self.keep_curret_scene:  # hou.hipFile.clear() 会清除非环境hda
+            if self.current_definition:
+                self.current_definition.setIsPreferred(1)
+                for df in self.tmp_definition:
+                    if df != self.current_definition:
+                        hda_path = df.libraryFilePath()  
+                        hou.hda.uninstallFile(hda_path)  #Embedded  也可以删除，除非当前有节点占用
                     
         self._handle_deleted_and_edited_nodes()
         self._handle_created_nodes()
