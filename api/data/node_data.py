@@ -7,6 +7,7 @@ class NodeType(Enum):
 
     NONE = auto()
     HDANODE = auto()
+    HDALOCKED = auto()
     Network = auto()
     NORMAL = auto()
 
@@ -35,13 +36,15 @@ class NodeData(ItemData):
             node_type = NodeType.NORMAL
             if node.type().definition():
                 node_type = NodeType.HDANODE
+                if  node.isLockedHDA():
+                    node_type = NodeType.HDALOCKED
             #elif node.type().name == "subnet":
             elif  node.isNetwork():
                 node_type = NodeType.Network
         
         self.node_type = node_type
         self.isBypassed = False
-
+        self.is_root = False
         if node and hasattr(node,"isBypassed"):
             self.isBypassed = node.isBypassed()
         if self.isBypassed:

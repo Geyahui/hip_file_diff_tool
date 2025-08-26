@@ -449,7 +449,8 @@ class HipFileDiffWindow(QMainWindow):
 
         self.houdini_comparator = HipFileComparator(source_path, target_path)
         self.houdini_comparator.compare()
-
+        self.source_model.proxy_model._IsFilterEnabled = False
+        self.target_model.proxy_model._IsFilterEnabled = False
         # Assuming 'comparison_result' contains the differences,
         # we can now update our tree views based on the results.
         self.source_model.populate_with_data(
