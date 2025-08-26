@@ -35,7 +35,7 @@ class HdaFileComparator(HoudiniComparator):
         if self.force_compare_top_node:
             #root_path_new = hda_node.parent().path()+"/cus_top_node"
             root_path_new = "/cus_top_node"
-        data_dict[root_path_new] = self._extract_node_data(hda_node,root_path_new)
+        data_dict[root_path_new] = self._extract_node_data(hda_node,root_path_new,True)
         for node in hda_node.allSubChildren():
             if node.isInsideLockedHDA():
                 continue

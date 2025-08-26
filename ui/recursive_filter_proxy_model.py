@@ -7,7 +7,9 @@ from ui.constants import DATA_ROLE, PATH_ROLE
 from api.data.item_data import ItemState
 from api.data.node_data import NodeData,NodeType
 from api.data.param_data import ParamData
-
+from hip_file_diff_tool import logger
+log = logger.CommonLogger
+import traceback
 class RecursiveFilterProxyModel(QSortFilterProxyModel):
     """
     Subclass of QSortFilterProxyModel that enables recursive filtering.
@@ -19,14 +21,26 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
         self.path_role = PATH_ROLE
         self.data_role = DATA_ROLE
         self._filtered_paths: Set[str] = set()
+        self._IsFilterEnabled  = True
 
     def filterAcceptsRow(
         self, source_row: int, source_parent: QModelIndex
     ) -> bool:
         """Check if a row in the source model should be included in the proxy model."""
+        if  not self._IsFilterEnabled:  #防止过度触发
+            return True
         source_index = self.sourceModel().index(source_row, 0, source_parent)
         item_path = self.sourceModel().data(source_index, self.path_role)
         
+        # if item_path == "/cus_top_node":
+        #     log.Log(item_path)
+            # log.Log(source_index.data())
+
+            # stack_str_list = traceback.format_stack(limit=7)  # 获取最近5层调用栈
+            # stack_str = "".join(stack_str_list)  
+            # log.Log("filterAcceptsRow 调用栈：")
+            # log.Log(stack_str)
+
         # If there's an active filter for paths and the item's path isn't in it, reject this row.
         if self._filtered_paths and item_path not in self._filtered_paths:
             # return True
@@ -82,7 +96,7 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
             #     print(index.data(self.data_role).node_type)
             #     print(index.data(self.path_role))
             #     print(index.model().view)
-            if index.data(self.data_role).node_type == NodeType.NORMAL:
+            if index.data(self.data_role).node_type in [NodeType.NORMAL,NodeType.HDALOCKED]:
                 if state_value  in [ItemState.UNCHANGED]:
                     return False
 
@@ -94,7 +108,11 @@ class RecursiveFilterProxyModel(QSortFilterProxyModel):
                 if parent_data.state != ItemState.EDITED:
                     return False
                 return True
-                
+        # log.Log(f"111111---  { data.path}   {state_value}  {index.data(self.data_role).node_type} " )
+        # stack_str_list = traceback.format_stack(limit=7)  # 获取最近5层调用栈
+        # stack_str = "".join(stack_str_list)  
+        # log.Log("conditionForItem 调用栈：")
+        # log.Log(stack_str)
         if state_value not in [ItemState.UNCHANGED]:
             return True
 

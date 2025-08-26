@@ -28,6 +28,8 @@ from api.comparators.hda_comparator import HdaFileComparator
 from ui import custom_qtree_view
 reload(custom_qtree_view)
 from ui.custom_qtree_view import CustomQTreeView
+from ui import custom_standart_item_model
+reload(custom_standart_item_model)
 from ui.custom_standart_item_model import CustomStandardItemModel
 from ui import hatched_pattern_item_delegate
 reload(hatched_pattern_item_delegate)
@@ -35,6 +37,8 @@ from ui.hatched_pattern_item_delegate import HatchedItemDelegate
 from ui import file_selector
 reload(file_selector)
 from ui.file_selector import FileSelector
+from ui import search_line_edit
+reload(search_line_edit)
 from ui.search_line_edit import QTreeViewSearch
 from ui.string_diff_dialog import StringDiffDialog
 from functools import partial
@@ -535,18 +539,33 @@ class HdaDiffWindow(QMainWindow):
         self.houdini_comparator.keep_curret_scene = self.keep_curret_scene
         
         self.houdini_comparator.compare()
+        self.source_model.proxy_model._IsFilterEnabled = False
+        self.target_model.proxy_model._IsFilterEnabled = False
+        #  以下这些方法并不能阻断 所有的 filterAcceptsRow , proxy_model.blockSignals 对 populate_with_data 有效
+        # self.source_model.proxy_model.beginResetModel()
+        # self.source_model.view.setUpdatesEnabled(False)
+        # self.source_model.proxy_model.blockSignals(True)
+        # self.target_model.proxy_model.blockSignals(True)
 
         # Assuming 'comparison_result' contains the differences,
         # we can now update our tree views based on the results.
+        # populate_with_data 和  paint_items_and_expand 都会频繁触发 filterAcceptsRow
         self.source_model.populate_with_data(
             self.houdini_comparator.source_data, self.source_treeview.objectName()
         )
         self.target_model.populate_with_data(
             self.houdini_comparator.target_data, self.target_treeview.objectName()
         )
-        #self.source_treeview.expandAll()
+
+
+        # self.source_treeview.expandAll()  # expandAll  比 paint_items_and_expand   filterAcceptsRow 触发次数少 代价小很多
         self.source_model.paint_items_and_expand(self.source_model.invisibleRootItem(), "")
         self.target_model.paint_items_and_expand(self.target_model.invisibleRootItem(), "")
+        # self.source_model.proxy_model.blockSignals(False)
+        # self.target_model.proxy_model.blockSignals(False)
+        # self.source_model.view.setUpdatesEnabled(True)
+        self.source_model.proxy_model._IsFilterEnabled = True
+        self.target_model.proxy_model._IsFilterEnabled = True
 
         self.source_treeview.model().invalidateFilter()
         self.target_treeview.model().invalidateFilter()

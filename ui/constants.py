@@ -27,3 +27,6 @@ with open(ICONS_MAPPING_PATH, "r") as file:
 
 PATH_ROLE = Qt.UserRole + 1
 DATA_ROLE = Qt.UserRole + 2
+
+
+ICON_CACHE = {}

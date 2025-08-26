@@ -9,7 +9,8 @@ from api.utilities import ordered_dict_insert, get_ordered_dict_key_index
 
 import hou
 
-
+from hip_file_diff_tool import logger
+log = logger.CommonLogger
 COLORS = {
     "red": "#b50400",
     "green": "#6ba100",
@@ -72,7 +73,7 @@ class HoudiniComparator(ABC):
                 "Supported formats are: {', '.join(HIP_FILE_FORMATS)}."
             )
 
-    def _extract_node_data(self, node: hou.Node,path = None) -> NodeData:
+    def _extract_node_data(self, node: hou.Node,path = None,is_root=False) -> NodeData:
         """
         Extracts data from a given node.
 
@@ -82,6 +83,7 @@ class HoudiniComparator(ABC):
         node_data = NodeData(node)
         node_data.path = node.path()
         node_data.real_path = node.path()
+        node_data.is_root = is_root
 
         node_data.type = node.type()
         node_data.icon = node.type().icon()
@@ -113,7 +115,6 @@ class HoudiniComparator(ABC):
             node_data.add_parm(
                 parm.name(), ParamData(parm.name(), parm.rawValue(), None)
             )
-
         return node_data
 
     def _validate_file_paths(self) -> None:
@@ -181,6 +182,10 @@ class HoudiniComparator(ABC):
                     target_node_dat.state = ItemState.EDITED
                     target_node_dat.color =  COLORS["green"]
                     target_node_dat.alpha = 100
+
+                if source_node_data.is_root ==True :   # path == "/cus_top_node"
+                    source_node_data.state = ItemState.EDITED
+                    target_node_dat.state = ItemState.EDITED
 
     def _compare_node_params(self, path: str, source_node_data: NodeData,del_node = False):
         """

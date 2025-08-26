@@ -13,8 +13,9 @@ from hutil.Qt.QtGui import (
 from hutil.Qt.QtCore import Qt
 
 from api.data.item_data import ItemState
-from ui.constants import ICONS_ZIP_PATH, PATH_ROLE, DATA_ROLE, ICON_MAPPINGS
-
+from ui.constants import ICONS_ZIP_PATH, PATH_ROLE, DATA_ROLE, ICON_MAPPINGS,ICON_CACHE
+from hip_file_diff_tool import logger
+log = logger.CommonLogger
 
 class CustomStandardItemModel(QStandardItemModel):
     """
@@ -40,18 +41,23 @@ class CustomStandardItemModel(QStandardItemModel):
         self, item: QStandardItem, icon_name: str, icons_zip: zipfile.ZipFile
     ) -> None:
         """Extract and set icon to item from given zip file."""
+        
         if not icon_name:
             return
-
-        try:
-            with icons_zip.open(icon_name) as file:
-                icon_data = file.read()
-                pixmap = QPixmap()
-                pixmap.loadFromData(icon_data)
-                item.setIcon(QIcon(pixmap))
-        except Exception:
-            pass
-
+        pixmap =  ICON_CACHE.get(icon_name)
+        if  pixmap:
+            item.setIcon(QIcon(pixmap))
+        if not pixmap:
+            try:
+                with icons_zip.open(icon_name) as file:
+                    icon_data = file.read()
+                    pixmap = QPixmap()
+                    pixmap.loadFromData(icon_data)
+                    ICON_CACHE[icon_name] = pixmap
+                    item.setIcon(QIcon(pixmap))
+            except Exception:
+                pass
+            
     def add_item_with_path(
         self,
         item_text: str,
@@ -166,28 +172,47 @@ class CustomStandardItemModel(QStandardItemModel):
 
     def populate_with_data(self, data, view_name: str) -> None:
         """Populate the model with given data and associate with a view."""
+
         with zipfile.ZipFile(ICONS_ZIP_PATH, "r") as zip_ref:
+            idx = 0
+            debug_paths = ["/cus_top_node/HFS_sand","/cus_top_node/transform1"]
+            # self.view.setUpdatesEnabled(False)
+            # self.proxy_model.blockSignals(True)
+            parms_count = 0
             for path in data:
+                
+                # if path not in  debug_paths:continue
+                # if idx>40:break
+
                 node_data = data[path]
+                parms_count += len(node_data.parms)
                 node_name = (
                     node_data.name if node_data.name != "/" else view_name
                 )
                 parent_path = node_data.parent_path
+                parent_item = None
                 parent_item = self.get_item_by_path(parent_path)
+
                 self.add_item_with_path(
                     node_name, path, node_data, zip_ref, parent=parent_item
                 )
-
+                idx +=1
+            # print(parms_count)
+            # self.proxy_model.blockSignals(False)
+            # self.view.setUpdatesEnabled(True)
+            
         # self.paint_items_and_expand(self.invisibleRootItem(), view_name)   #同一个窗口实例运行第二次以后易发生崩溃，因为做了sync_expand，多次运行后可能index会失效
 
     def paint_items_and_expand(self, parent_item, view_name: str) -> None:
         """Recursively style and expand items starting from the parent item."""
+        # self.proxy_model.blockSignals(True)
         for row in range(parent_item.rowCount()):
             for column in range(parent_item.columnCount()):
                 child_item = parent_item.child(row, 0)
                 if child_item:
                     self._apply_item_style_and_expansion(child_item)
                     self.paint_items_and_expand(child_item, view_name)
+        # self.proxy_model.blockSignals(False)
 
     def _apply_item_style_and_expansion(self, item: QStandardItem) -> None:
         """Style and expand the given item based on its properties."""

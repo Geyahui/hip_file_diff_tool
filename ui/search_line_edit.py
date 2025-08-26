@@ -1,4 +1,5 @@
 import os
+from imp import reload
 from typing import Set, Optional
 
 from hutil.Qt.QtWidgets import QWidget, QLineEdit, QAbstractItemView, QAction
@@ -6,6 +7,8 @@ from hutil.Qt.QtCore import Qt
 from hutil.Qt.QtGui import QPixmap, QIcon
 
 from ui.constants import PATH_ROLE, ICONS_PATH
+from ui import recursive_filter_proxy_model
+reload(recursive_filter_proxy_model)
 from ui.recursive_filter_proxy_model import RecursiveFilterProxyModel
 
 
