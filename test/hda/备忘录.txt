@@ -23,7 +23,7 @@ filterAcceptsRow 总触发  44300次  大约是 item_data 的 10倍
 
 因此 filterAcceptsRow 并没有增长很多， 但是 conditionForItem 增长的不正常
 查询结果  类似于 /cus_top_node/HFS_sand 这样的子hda 包括color
-conditionForItem 中 会因为以下逻辑没有被成功返回 False,  因为类型是NodeType.HDANOD
+conditionForItem 中 会因为以下逻辑没有被成功返回 False,  因为类型是NodeType.HDANODE
         if index.data(self.data_role).node_type == NodeType.NORMAL:
             if state_value  in [ItemState.UNCHANGED]:
                 return False
