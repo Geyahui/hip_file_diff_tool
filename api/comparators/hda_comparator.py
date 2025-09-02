@@ -36,11 +36,14 @@ class HdaFileComparator(HoudiniComparator):
             #root_path_new = hda_node.parent().path()+"/cus_top_node"
             root_path_new = "/cus_top_node"
         data_dict[root_path_new] = self._extract_node_data(hda_node,root_path_new,True)
-        for node in hda_node.allSubChildren(recurse_in_locked_nodes=False):  
+        for node in hda_node.allSubItems(recurse_in_locked_nodes=False):  
 
             #忽略锁定的hda  同 recurse_in_locked_nodes=False
             # if node.isInsideLockedHDA():
             #     continue
+
+            if  not self._is_vaild(node):
+                continue
             path = node.path()
             path  = path.replace(root_path,root_path_new)
 

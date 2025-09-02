@@ -20,6 +20,8 @@ class HipFileComparator(HoudiniComparator):
         for node in hou.node("/").allNodes():
             if node.isInsideLockedHDA():
                 continue
+            if  not self._is_vaild(node):
+                continue
             data_dict[node.path()] = self._extract_node_data(node)
 
         return data_dict

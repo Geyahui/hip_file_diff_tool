@@ -228,29 +228,29 @@ class HdaDiffWindow(QMainWindow):
 
         def frameNetworkEditor_2(editor, items = None):
             if not items:
-                items = hou.selectedNodes()
+                items = hou.selectedItems()
             if len(items)<1:
                 return
             items_first = items[0]
-            xy1 = items_first.position() -  (items_first.size() / 2)
-            xy2 = items_first.position() +  (items_first.size() / 2)
 
-            #bound = hou.BoundingRect(0,0,0.1,0.1)
-            bound = hou.BoundingRect(xy1,xy2)
+            bound = hou.BoundingRect(items_first.position(),items_first.position()+items_first.size())
+
             for node in items:
                 bound.enlargeToContain(node.position())
+                bound.enlargeToContain(node.position()+node.size())
             #print(bound.size())
             #bound.scale((1.2,1.2))
             bound.expand((2,2))
             editor.cd(items_first.parent().path())
 
             editor.setVisibleBounds(bound,transition_time=0.2,set_center_when_scale_rejected = 1)
-        
-        node = hou.node(item_path)
+
+        node = hou.item(item_path)
+
         if node:
-            hou.node(item_path).setCurrent(1,1)
-            hou.node(item_path).setSelected(1,1)
-     
+            if isinstance(node,hou.OpNode):
+                node.setCurrent(1,1)
+            node.setSelected(1,1)
             network_editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
             if network_editor:
                 frameNetworkEditor_2(network_editor)
@@ -553,6 +553,7 @@ class HdaDiffWindow(QMainWindow):
         self.source_model.populate_with_data(
             self.houdini_comparator.source_data, self.source_treeview.objectName()
         )
+        
         self.target_model.populate_with_data(
             self.houdini_comparator.target_data, self.target_treeview.objectName()
         )

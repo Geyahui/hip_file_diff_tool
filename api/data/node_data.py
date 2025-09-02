@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from api.data.item_data import ItemData
 from enum import auto, Enum
-
+import hou
 class NodeType(Enum):
 
     NONE = auto()
@@ -10,7 +10,7 @@ class NodeType(Enum):
     HDALOCKED = auto()
     Network = auto()
     NORMAL = auto()
-
+    OTHERS = auto()
     def __str__(self):
         return f"{self.name.lower()}"
 
@@ -34,14 +34,16 @@ class NodeData(ItemData):
         if node:
             name = node.name()
             node_type = NodeType.NORMAL
-            if node.type().definition():
-                node_type = NodeType.HDANODE
-                if  node.isLockedHDA():
-                    node_type = NodeType.HDALOCKED
-            #elif node.type().name == "subnet":
-            elif  node.isNetwork():
-                node_type = NodeType.Network
-        
+            if isinstance(node,hou.OpNode):
+                if node.type().definition():
+                    node_type = NodeType.HDANODE
+                    if  node.isLockedHDA():
+                        node_type = NodeType.HDALOCKED
+                #elif node.type().name == "subnet":
+                elif  node.isNetwork():
+                    node_type = NodeType.Network
+            else:
+                node_type = NodeType.OTHERS
         self.node_type = node_type
         self.isBypassed = False
         self.is_root = False

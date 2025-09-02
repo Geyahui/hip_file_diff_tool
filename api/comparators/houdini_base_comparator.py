@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
+from imp import reload
 from collections import OrderedDict
 import os
 
 from api.data.item_data import ItemState
+from api.data import node_data
+reload(node_data)
 from api.data.node_data import NodeData
 from api.data.param_data import ParamData
 from api.utilities import ordered_dict_insert, get_ordered_dict_key_index
@@ -18,7 +21,7 @@ COLORS = {
 
 HIP_FILE_FORMATS = {"hda","hip", "hipnc", "hiplc", "hdt"}
 
-
+NODE_TYPE_LIMIT = [hou.OpNetworkDot,hou.OpSubnetIndirectInput,hou.OpStickyNote,hou.OpNode]
 class HoudiniComparator(ABC):
     """Comparator class for comparing two Houdini related files."""
     def __init__(self, source_file: str, target_file: str):
@@ -73,6 +76,11 @@ class HoudiniComparator(ABC):
                 "Supported formats are: {', '.join(HIP_FILE_FORMATS)}."
             )
 
+    def _is_vaild(self, node):
+        for vaild_type in NODE_TYPE_LIMIT:
+            if isinstance(node,vaild_type):
+                return True
+        return False
     def _extract_node_data(self, node: hou.Node,path = None,is_root=False) -> NodeData:
         """
         Extracts data from a given node.
@@ -85,36 +93,59 @@ class HoudiniComparator(ABC):
         node_data.real_path = node.path()
         node_data.is_root = is_root
 
-        node_data.type = node.type()
-        node_data.icon = node.type().icon()
+        node_data.type = type(node)
+        if  isinstance(node,hou.OpNode):
+            node_data.type = node.type()
+            node_data.icon = node.type().icon()
         node_data.parent_path = self._get_parent_path(node)
         if path:
             node_data.path = path
             node_data.parent_path = os.path.split(path)[0]
+        if  isinstance(node,hou.OpNode):
+            input_connections = [inp_node.name() for inp_node in node.inputs() if inp_node]
 
-        input_connections = [inp_node.name() for inp_node in node.inputs() if inp_node]
-        if input_connections:
-            inp_conn_param = ParamData(
-                "-> input connections", 
-                ", ".join(input_connections), 
-                None
-            )
-            inp_conn_param.icon = False
-            node_data.add_parm(
-                "-> input connections", 
-                inp_conn_param
-            )
-
-        user_data = node.userDataDict()
+            if input_connections:
+                inp_conn_param = ParamData(
+                    "-> input connections", 
+                    ", ".join(input_connections), 
+                    None
+                )
+                inp_conn_param.icon = False
+                node_data.add_parm(
+                    "-> input connections", 
+                    inp_conn_param
+                )
         param_user_data = ParamData("userData", None, None)
-        if user_data:
-            param_user_data.value = user_data
-        node_data.user_data = param_user_data
+        if isinstance(node,hou.OpNode):
+            user_data = node.userDataDict()
+            if user_data:
+                param_user_data.value = user_data
+        
 
-        for parm in node.parms():
-            node_data.add_parm(
-                parm.name(), ParamData(parm.name(), parm.rawValue(), None)
-            )
+            for parm in node.parms():
+                node_data.add_parm(
+                    parm.name(), ParamData(parm.name(), parm.rawValue(), None)
+                )
+        node_data.user_data = param_user_data
+        
+        if isinstance(node,hou.OpNetworkBox): 
+            node_data.add_parm("comment",ParamData("comment", node.comment(), None))
+            contentNodes = [inp_node.name() for inp_node in node.nodes() if inp_node]
+            node_data.add_parm("nodes",ParamData("nodes", ";".join(contentNodes), None))
+
+        elif isinstance(node,hou.OpStickyNote):  
+            node_data.add_parm("text",ParamData("text", node.text(), None))
+
+        elif isinstance(node,hou.OpSubnetIndirectInput) : 
+            inNode = node.input()
+            node_data.add_parm("input",ParamData("input", inNode.name() if inNode else "", None))
+            #repr(node)
+            node_data.name = "Sub-NetWork Input #"+ node.name()
+        if isinstance(node,hou.OpNetworkDot):
+            inNode = node.input()
+            
+            node_data.add_parm("input",ParamData("input", inNode.name() if inNode else "", None))
+
         return node_data
 
     def _validate_file_paths(self) -> None:
