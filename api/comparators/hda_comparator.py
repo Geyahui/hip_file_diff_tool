@@ -3,6 +3,8 @@ import hou
 from api.comparators import houdini_base_comparator
 reload(houdini_base_comparator)
 from api.comparators.houdini_base_comparator import HoudiniComparator
+from api.data.param_data import ParamData
+import re
 
 class HdaFileComparator(HoudiniComparator):
     """Comparator class for comparing two Houdini HIP files."""
@@ -36,6 +38,14 @@ class HdaFileComparator(HoudiniComparator):
             #root_path_new = hda_node.parent().path()+"/cus_top_node"
             root_path_new = "/cus_top_node"
         data_dict[root_path_new] = self._extract_node_data(hda_node,root_path_new,True)
+        hda_section = hda_node.type().definition().sections()
+        for sec_name,sec in hda_section.items():
+            if sec_name  in [ "Contents.gz","ExtraFileOptions","InternalFileOptions"]:
+                continue
+            for i in ["DialogScript","PythonModule","Expressions","^On.+"]:
+                if re.fullmatch(i,sec_name):
+                    data_dict[root_path_new].add_parm("[HDASection]"+sec_name, ParamData("[section]"+sec_name, sec.contents(), None))
+                    break
         for node in hda_node.allSubItems(recurse_in_locked_nodes=False):  
 
             #忽略锁定的hda  同 recurse_in_locked_nodes=False

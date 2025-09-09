@@ -124,7 +124,7 @@ class HoudiniComparator(ABC):
 
             for parm in node.parms():
                 node_data.add_parm(
-                    parm.name(), ParamData(parm.name(), parm.rawValue(), None)
+                    parm.name(), ParamData(parm.name(), parm.rawValue(), None,scriptCallback=parm.parmTemplate().scriptCallback())
                 )
         node_data.user_data = param_user_data
         

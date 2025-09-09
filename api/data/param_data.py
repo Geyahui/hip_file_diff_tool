@@ -31,6 +31,7 @@ class ParamData:
         alpha: int = 255,
         is_hatched: bool = False,
         icon: bool = True,
+        scriptCallback: str = "",
     ):
         """
         Initialize a new instance of the ParamData class.
@@ -47,7 +48,7 @@ class ParamData:
         """
         self.name = name
         self.value = value
-
+        self.scriptCallback = scriptCallback
         self.state = state
         self.is_active = True
         self.color = color

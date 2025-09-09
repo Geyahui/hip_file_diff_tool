@@ -166,6 +166,17 @@ class CustomStandardItemModel(QStandardItemModel):
         parm_item.appendRow(value_item)
         self.item_dictionary[value_path] = value_item
 
+        if parm.scriptCallback:
+            script = str(parm.scriptCallback) if parm.is_active else ""
+            script_path = f"{parm_path}/script"
+            script_item = QStandardItem(script)
+            script_item.setFlags(parm_item.flags() & ~Qt.ItemIsEditable)
+            script_data = copy.copy(parm)
+            script_data.state = ItemState.VALUE
+            script_item.setData(script_data, self.data_role)
+            script_item.setData(script_path, self.path_role)
+            parm_item.appendRow(script_item)
+            self.item_dictionary[script_path] = script_item
     def get_item_by_path(self, path: str) -> Optional[QStandardItem]:
         """Return the item associated with given path."""
         return self.item_dictionary.get(path)
